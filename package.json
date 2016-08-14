@@ -1,0 +1,47 @@
+{
+  "name": "import-service",
+  "version": "0.1.0",
+  "description": "Import service",
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp jshint test watch",
+    "start": "gulp start",
+    "gulp": "node_modules/.bin/gulp",
+    "stop": "gulp server-stop",
+    "restart": "gulp server-restart"
+  },
+  "keywords": [
+    "import-service"
+  ],
+  "author": "Analyn Flores",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "chai": "^3.5.0",
+    "chakram": "^1.4.0",
+    "csv-generate": "^1.0.0",
+    "csv-write-stream": "^2.0.0",
+    "express": "^4.14.0",
+    "express-interceptor": "^1.2.0",
+    "fs-extra": "^0.30.0",
+    "gulp": "^3.9.1",
+    "gulp-clean": "^0.3.2",
+    "gulp-express": "^0.3.5",
+    "gulp-jshint": "^2.0.1",
+    "gulp-mocha": "^2.2.0",
+    "http": "0.0.0",
+    "jshint": "^2.9.2",
+    "jshint-stylish": "^2.2.0",
+    "lodash": "^4.13.1",
+    "log4js": "^0.6.38",
+    "mocha": "^2.5.3",
+    "mocha-unfunk-reporter": "^0.4.0",
+    "mongoose": "^4.5.3",
+    "morgan": "^1.7.0",
+    "multer": "^1.1.0",
+    "node-fs": "^0.1.7",
+    "run-sequence": "^1.2.2",
+    "should": "^9.0.2",
+    "sinon": "^1.17.4"
+  }
+}
