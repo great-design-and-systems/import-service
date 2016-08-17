@@ -4,8 +4,10 @@ var LoggerServer = require('./src/config/logger-server');
 var express = require('express');
 var app = express();
 var http = require('http');
+var io = require('socket.io');
 var ImportResource = require('./src/boundary/import-resource');
 var InitServices = require('./src/config/init-services');
+var Socket = require('./src/config/socket');
 (function() {
     new InitServices(function(err, services) {
         if (err) {
@@ -15,7 +17,9 @@ var InitServices = require('./src/config/init-services');
             new Database();
             new Server(app);
             new LoggerServer(app);
-            new ImportResource(app, services);
+            new Socket(app, io, http, function(err, sockets) {
+                new ImportResource(app, services, sockets);
+            });
         }
     });
 

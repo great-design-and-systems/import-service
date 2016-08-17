@@ -6,42 +6,42 @@
     var chai = require('chai');
     var expect = chai.expect;
     var fs = require('fs-extra');
-    describe('Import Service BDD', function() {
-        var db = new Database();
+    /*
+         var db = new Database();
 
-        beforeEach(function(done) {
-            return db.connect(done);
-        });
+         beforeEach(function(done) {
+             return db.connect(done);
+         });
 
-        describe('GIVEN: I have import tracker info', function() {
+         describe('GIVEN: I have import tracker info', function() {
 
-            var importTracker = {};
+             var importTracker = {};
 
-            beforeEach(function() {
-                importTracker.description = 'Smple tracker 1';
-                importTracker.progressLimit = 2;
-                importTracker.dataFor = 'student'
-            });
+             beforeEach(function() {
+                 importTracker.description = 'Smple tracker 1';
+                 importTracker.progressLimit = 2;
+                 importTracker.dataFor = 'student'
+             });
 
-            describe('WHEN: creating new import csv', function() {
-                var createdImportId;
-                beforeEach(function(done) {
-                    Import.createImportCSV(importTracker.description, importTracker.progressLimit, importTracker.dataFor, function(err, result) {
-                        if (err) {
-                            console.error('Creating new import', err);
-                        }
-                        createdImportId = result.importId;
-                        done();
-                    });
-                });
-                it('THEN: import tracker is created', function() {
-                    expect(createdImportId).to.not.be.null;
-                });
-            });
-        });
+             describe('WHEN: creating new import csv', function() {
+                 var createdImportId;
+                 beforeEach(function(done) {
+                     Import.createImportCSV(importTracker.description, importTracker.progressLimit, importTracker.dataFor, function(err, result) {
+                         if (err) {
+                             console.error('Creating new import', err);
+                         }
+                         createdImportId = result.importId;
+                         done();
+                     });
+                 });
+                 it('THEN: import tracker is created', function() {
+                     expect(createdImportId).to.not.be.null;
+                 });
+             });
+         });
 
-        afterEach(function(done) {
-            return db.disconnect(done);
-        });
-    });
+         afterEach(function(done) {
+             return db.disconnect(done);
+         });
+     });*/
 })();
