@@ -6,6 +6,7 @@ function execute(app, io, http, callback) {
     var server = http.createServer(app);
     var sockets = io(server);
     server.listen(PORT);
+    callback(undefined, sockets);
     console.log('Node app is running on port', PORT);
 }
 
