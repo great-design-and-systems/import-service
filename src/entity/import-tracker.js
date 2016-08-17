@@ -27,7 +27,10 @@ var importTrackerSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Data for is required']
     },
-    fileId: String,
+    fileId: {
+        type: String,
+        required: [true, 'File id is required']
+    },
     createdOn: {
         type: Date,
         default: Date.now
