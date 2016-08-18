@@ -14,6 +14,18 @@ module.exports = function(app, services, sockets) {
                 runImportCsv: {
                     method: 'PUT',
                     url: 'http://' + req.headers.host + API + 'run-import-csv'
+                },
+                getImportCompleted: {
+                    method: 'GET',
+                    url: 'http://' + req.headers.host + API + 'get-import-completed'
+                },
+                getImportFailed: {
+                    method: 'GET',
+                    url: 'http://' + req.headers.host + API + 'get-import-failed'
+                },
+                getImportProgress: {
+                    method: 'GET',
+                    url: 'http://' + req.headers.host + API + 'get-import-progress'
                 }
             }
         });
@@ -61,4 +73,33 @@ module.exports = function(app, services, sockets) {
         });
     });
 
+    app.get(API + 'get-import-progress', function(req, res) {
+        Import.getImportProgress(function(err, result) {
+            if (err) {
+                res.status(200).send([]);
+            } else {
+                res.status(200).send(result);
+            }
+        });
+    });
+
+    app.get(API + 'get-import-completed', function(req, res) {
+        Import.getImportCompleted(function(err, result) {
+            if (err) {
+                res.status(200).send([]);
+            } else {
+                res.status(200).send(result);
+            }
+        });
+    });
+
+    app.get(API + 'get-import-failed', function(req, res) {
+        Import.getImportFailed(function(err, result) {
+            if (err) {
+                res.status(200).send([]);
+            } else {
+                res.status(200).send(result);
+            }
+        });
+    });
 };

@@ -10,9 +10,16 @@ var UpdateImportStatusToProgress = require('../control/update-import-status-to-i
 var UpdateImportStatusToCompleted = require('../control/update-import-status-to-completed');
 var LogImportItemFailed = require('../control/log-import-item-failed');
 var LogImportItemSuccess = require('../control/log-import-item-success');
+var GetImportFailed = require('../control/get-import-failed');
+var GetImportCompleted = require('../control/get-import-completed');
+var GetImportProgress = require('../control/get-import-progress');
+
 module.exports = {
     runImportCSV: runImportCSV,
-    createImportCSV: createImportCSV
+    createImportCSV: createImportCSV,
+    getImportFailed: getImportFailed,
+    getImportCompleted: getImportCompleted,
+    getImportProgress: getImportProgress
 };
 
 function runImportCSV(importId, services, track, callback) {
@@ -121,4 +128,16 @@ function createImportCSV(description, fileId, dataFor, rawEncoded, callback) {
             }
         });
     });
+}
+
+function getImportFailed(callback) {
+    new GetImportFailed(callback);
+}
+
+function getImportCompleted(callback) {
+    new GetImportCompleted(callback);
+}
+
+function getImportProgress(callback) {
+    new GetImportProgress(callback);
 }
