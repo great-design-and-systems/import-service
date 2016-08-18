@@ -30,6 +30,10 @@ module.exports = function(app, services, sockets) {
                 getImportLogs: {
                     method: 'GET',
                     url: 'http://' + req.headers.host + API + 'get-import-logs/:importId'
+                },
+                removeImportTracker: {
+                    method: 'DELETE',
+                    url: 'http://' + req.headers.host + API + 'remove-import-tracker/:importId'
                 }
             }
         });
@@ -109,6 +113,17 @@ module.exports = function(app, services, sockets) {
                 res.status(200).send([]);
             } else {
                 res.status(200).send(result);
+            }
+        });
+    });
+    app.delete(API + 'remove-import-tracker/:importId', function(req, res) {
+        Import.removeImportTracker(req.params.importId, function(err) {
+            if (err) {
+                res.status(500).send(err);
+            } else {
+                res.status(200).send({
+                    message: 'Import ' + req.params.importId + ' has been removed'
+                });
             }
         });
     });

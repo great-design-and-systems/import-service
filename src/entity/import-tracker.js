@@ -14,6 +14,10 @@ var importTrackerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    errorCount: {
+        type: Number,
+        default: 0
+    },
     progressLimit: {
         type: Number,
         required: [true, 'Progress limit is required.']

@@ -14,13 +14,17 @@ var GetImportFailed = require('../control/get-import-failed');
 var GetImportCompleted = require('../control/get-import-completed');
 var GetImportProgress = require('../control/get-import-progress');
 var GetImportLogs = require('../control/get-import-logs');
+var RemoveImportTracker = require('../control/remove-import-tracker');
+var UpdateErrorCountById = require('../control/update-error-count-by-id');
+
 module.exports = {
     runImportCSV: runImportCSV,
     createImportCSV: createImportCSV,
     getImportFailed: getImportFailed,
     getImportCompleted: getImportCompleted,
     getImportProgress: getImportProgress,
-    getImportLogs: getImportLogs
+    getImportLogs: getImportLogs,
+    removeImportTracker: removeImportTracker
 };
 
 function runImportCSV(importId, services, track, callback) {
@@ -37,6 +41,7 @@ function runImportCSV(importId, services, track, callback) {
                         if (!errFile) {
                             new ParseRawCSV(result.response.rawEncoded, function(errParse, parsedCsv) {
                                 if (!errParse) {
+                                    var errorCount = 0;
                                     new IterateCSVByBatch(parsedCsv, function(columns, item, itemCount, next) {
                                         new CreateJsonFormatFromColumns(columns, item, function(errJsonFormat, jsonFormatObject) {
                                             if (!errJsonFormat) {
@@ -47,7 +52,9 @@ function runImportCSV(importId, services, track, callback) {
                                                         if (errStudentSave) {
                                                             //should log
                                                             console.error('import', errStudentSave);
+                                                            errorCount++;
                                                             new LogImportItemFailed(importId, columns, item, itemCount);
+                                                            new UpdateErrorCountById(importId, errorCount);
                                                         } else {
                                                             new LogImportItemSuccess(importId, columns, item, itemCount);
                                                             new UpdateTrackerCountById(importId, itemCount, function(errUpdateTracker) {
@@ -64,8 +71,10 @@ function runImportCSV(importId, services, track, callback) {
                                                     }, function(errFacultySave) {
                                                         if (errFacultySave) {
                                                             //should log
+                                                            errorCount++;
                                                             console.error('import', errFacultySave);
                                                             new LogImportItemFailed(importId, columns, item, itemCount);
+                                                            new UpdateErrorCountById(importId, errorCount);
                                                         } else {
                                                             new LogImportItemSuccess(importId, columns, item, itemCount);
                                                             new UpdateTrackerCountById(importId, itemCount, function(errUpdateTracker) {
@@ -145,4 +154,8 @@ function getImportProgress(callback) {
 
 function getImportLogs(importId, callback) {
     new GetImportLogs(importId, callback);
+}
+
+function removeImportTracker(importId, callback) {
+    new RemoveImportTracker(importId, callback);
 }
