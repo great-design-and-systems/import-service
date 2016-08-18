@@ -29,6 +29,7 @@ module.exports = function(app, services, sockets) {
             },
             function(err) {
                 if (err) {
+                    console.error('import-resource', err);
                     sockets.emit('import-fail', err);
                 } else {
                     sockets.emit('import-complete');
