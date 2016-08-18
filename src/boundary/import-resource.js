@@ -26,6 +26,10 @@ module.exports = function(app, services, sockets) {
                 getImportProgress: {
                     method: 'GET',
                     url: 'http://' + req.headers.host + API + 'get-import-progress'
+                },
+                getImportLogs: {
+                    method: 'GET',
+                    url: 'http://' + req.headers.host + API + 'get-import-logs/:importId'
                 }
             }
         });
@@ -72,7 +76,6 @@ module.exports = function(app, services, sockets) {
             }
         });
     });
-
     app.get(API + 'get-import-progress', function(req, res) {
         Import.getImportProgress(function(err, result) {
             if (err) {
@@ -82,7 +85,6 @@ module.exports = function(app, services, sockets) {
             }
         });
     });
-
     app.get(API + 'get-import-completed', function(req, res) {
         Import.getImportCompleted(function(err, result) {
             if (err) {
@@ -92,9 +94,17 @@ module.exports = function(app, services, sockets) {
             }
         });
     });
-
     app.get(API + 'get-import-failed', function(req, res) {
         Import.getImportFailed(function(err, result) {
+            if (err) {
+                res.status(200).send([]);
+            } else {
+                res.status(200).send(result);
+            }
+        });
+    });
+    app.get(API + 'get-import-logs/:importId', function(req, res) {
+        Import.getImportLogs(req.params.importId, function(err, result) {
             if (err) {
                 res.status(200).send([]);
             } else {

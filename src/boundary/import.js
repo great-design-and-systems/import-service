@@ -13,13 +13,14 @@ var LogImportItemSuccess = require('../control/log-import-item-success');
 var GetImportFailed = require('../control/get-import-failed');
 var GetImportCompleted = require('../control/get-import-completed');
 var GetImportProgress = require('../control/get-import-progress');
-
+var GetImportLogs = require('../control/get-import-logs');
 module.exports = {
     runImportCSV: runImportCSV,
     createImportCSV: createImportCSV,
     getImportFailed: getImportFailed,
     getImportCompleted: getImportCompleted,
-    getImportProgress: getImportProgress
+    getImportProgress: getImportProgress,
+    getImportLogs: getImportLogs
 };
 
 function runImportCSV(importId, services, track, callback) {
@@ -140,4 +141,8 @@ function getImportCompleted(callback) {
 
 function getImportProgress(callback) {
     new GetImportProgress(callback);
+}
+
+function getImportLogs(importId, callback) {
+    new GetImportLogs(importId, callback);
 }
