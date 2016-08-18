@@ -73,12 +73,10 @@ function runImportCSV(importId, services, track, callback) {
                                                 callback(errJsonFormat);
                                             }
                                         });
-                                    }, function(errBatch) {
-                                        if (!errBatch) {
-                                            new UpdateImportStatusToCompleted(importId, callback);
-                                        } else {
-                                            callback(errBatch);
-                                        }
+                                    }, function() {
+                                        new UpdateImportStatusToCompleted(importId, function() {
+                                            callback();
+                                        });
                                     });
                                 } else {
                                     callback(errParse);
