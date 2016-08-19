@@ -118,7 +118,7 @@ function createImportCSV(description, fileId, dataFor, rawEncoded, callback) {
         new CreateImportTracker({
             description: description,
             type: 'csv_importer',
-            progressLimit: data.length,
+            progressLimit: (data.length - 1),
             dataFor: dataFor,
             fileId: fileId
         }, function(errCreateImport, resultCreateImport) {
