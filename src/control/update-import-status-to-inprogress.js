@@ -1,5 +1,6 @@
 'use strict';
 var ImportTracker = require('../entity/import-tracker');
+var logger = require('./get-logger');
 
 function execute(importId, callback) {
     ImportTracker.findByIdAndUpdate(importId, {
@@ -8,7 +9,7 @@ function execute(importId, callback) {
         if (!err) {
             callback();
         } else {
-            console.error('update-import-status-inprogress', err);
+            logger.error('update-import-status-inprogress', err);
             callback({
                 message: 'Failed updating status to in-progress.'
             });

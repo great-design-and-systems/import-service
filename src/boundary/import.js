@@ -16,6 +16,7 @@ var GetImportProgress = require('../control/get-import-progress');
 var GetImportLogs = require('../control/get-import-logs');
 var RemoveImportTracker = require('../control/remove-import-tracker');
 var UpdateErrorCountById = require('../control/update-error-count-by-id');
+var logger = require('../control/get-logger');
 
 module.exports = {
     runImportCSV: runImportCSV,
@@ -32,7 +33,7 @@ function runImportCSV(importId, services, track, callback) {
         if (!err) {
             new GetImportById(importId, function(err, importTracker) {
                 if (!err) {
-                    console.log('importTracker', importTracker);
+                    logger.info('importTracker', importTracker);
                     services.fileServicePort.links.downloadFile.execute({
                         params: {
                             fileId: importTracker.fileId
@@ -51,7 +52,7 @@ function runImportCSV(importId, services, track, callback) {
                                                     }, function(errStudentSave) {
                                                         if (errStudentSave) {
                                                             //should log
-                                                            console.error('import', errStudentSave);
+                                                            logger.error('import', errStudentSave);
                                                             errorCount++;
                                                             new LogImportItemFailed(importId, columns, item, itemCount);
                                                             new UpdateErrorCountById(importId, errorCount);
@@ -72,7 +73,7 @@ function runImportCSV(importId, services, track, callback) {
                                                         if (errFacultySave) {
                                                             //should log
                                                             errorCount++;
-                                                            console.error('import', errFacultySave);
+                                                            logger.error('import', errFacultySave);
                                                             new LogImportItemFailed(importId, columns, item, itemCount);
                                                             new UpdateErrorCountById(importId, errorCount);
                                                         } else {

@@ -1,5 +1,6 @@
 'use strict';
 var ImportColumns = require('../entity/import-columns');
+var logger = require('./get-logger');
 
 function execute(importId, columns, callback) {
     ImportColumns.create({
@@ -7,7 +8,7 @@ function execute(importId, columns, callback) {
         columns: columns
     }, function(err, created) {
         if (err) {
-            console.error('create-import-columns', err);
+            logger.error('create-import-columns', err);
             callback({
                 message: 'Failed creating new import columns.'
             });

@@ -1,10 +1,11 @@
 'use strict';
 var ImportTracker = require('../entity/import-tracker');
+var logger = require('./get-logger');
 
 function execute(importId, callback) {
     ImportTracker.findByIdAndRemove(importId, function(err) {
         if (err) {
-            console.error('remove-import-tracker', err);
+            logger.error('remove-import-tracker', err);
             callback({
                 message: 'Failed removing import ' + importId
             });

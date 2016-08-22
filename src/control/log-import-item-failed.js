@@ -1,5 +1,6 @@
 'use strict';
 var ImportLog = require('../entity/import-log');
+var logger = require('./get-logger');
 
 function execute(importId, columns, items, progressCount, callback) {
     ImportLog.create({
@@ -11,7 +12,7 @@ function execute(importId, columns, items, progressCount, callback) {
         progressCount: progressCount
     }, function(err) {
         if (err) {
-            console.error('log-import-item-failed', err);
+            logger.error('log-import-item-failed', err);
             if (callback) {
                 callback({
                     message: 'Failed creating new import log.'

@@ -1,5 +1,6 @@
 'use strict';
 var ImportTracker = require('../entity/import-tracker');
+var logger = require('./get-logger');
 
 function execute(importId, errorCount, callback) {
     ImportTracker.findByIdAndUpdate(importId, {
@@ -10,7 +11,7 @@ function execute(importId, errorCount, callback) {
                 callback();
             }
         } else {
-            console.error('update-error-count-by-id', err);
+            logger.error('update-error-count-by-id', err);
             if (callback) {
                 callback({
                     message: 'Failed updating error count.'

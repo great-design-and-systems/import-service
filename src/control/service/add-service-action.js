@@ -2,6 +2,7 @@
 var restler = require('restler');
 var lodash = require('lodash');
 var SetDefaultProtocol = require('./set-default-protocol');
+var logger = require('../get-logger');
 
 function execute(links, callback) {
     try {
@@ -10,7 +11,7 @@ function execute(links, callback) {
         });
         callback(undefined, links);
     } catch (err) {
-        console.error('add-service-action', err);
+        logger.error('add-service-action', err);
         callback(err);
     }
 }
@@ -32,7 +33,7 @@ function action(options, callback) {
     if (!options.timeout) {
         options.timeout = process.env.CALL_TIMEOUT || 20000;
     }
-    console.log('options', options);
+    logger.info('options', options);
     var method = 'get';
     if (link.method === 'POST') {
         method = 'post';
@@ -46,25 +47,25 @@ function action(options, callback) {
             url = url.replace(':' + key, value);
         });
     }
-    console.log('request made: ' + url);
+    logger.info('request made: ' + url);
     lodash.get(restler, method)(url, options)
         .on('success', function(result, response) {
-            console.log('request success: ' + url);
+        	logger.info('request success: ' + url);
             callback(undefined, {
                 data: result,
                 response: response
             });
         })
         .on('error', function(reason, response) {
-            console.error('ERROR: ' + url, reason);
+            logger.error('ERROR: ' + url, reason);
             callback(reason, response);
         })
         .on('fail', function(reason, response) {
-            console.error('FAIL: ' + url, reason);
+            logger.error('FAIL: ' + url, reason);
             callback(reason, response);
         })
         .on('timeout', function(reason, response) {
-            console.error('TIMEOUT: ' + link.url, reason);
+            logger.error('TIMEOUT: ' + link.url, reason);
             callback(reason, response);
         });
 }

@@ -1,5 +1,6 @@
 'use strict';
 var lodash = require('lodash');
+var logger = require('./get-logger');
 
 function execute(columns, item, callback) {
     var jsonFormat = {};
@@ -9,7 +10,7 @@ function execute(columns, item, callback) {
         });
         callback(undefined, jsonFormat);
     } catch (err) {
-        console.error('create-json-format-from-columns', err);
+        logger.error('create-json-format-from-columns', err);
         callback({
             message: 'Error creating json format for item: ' + item + '.'
         });
