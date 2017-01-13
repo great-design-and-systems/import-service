@@ -2,6 +2,7 @@
 var CreateImportTracker = require('../control/create-import-tracker');
 var CreateImportColumns = require('../control/create-import-columns');
 var ParseRawCSV = require('../control/parse-raw-csv');
+var ParseRawMarc = require('../control/parse-raw-marc');
 var GetImportById = require('../control/get-import-by-id');
 var IterateCSVByBatch = require('../control/iterate-csv-by-batch');
 var CreateJsonFormatFromColumns = require('../control/create-json-format-from-columns');
@@ -21,6 +22,7 @@ var logger = require('../control/get-logger');
 module.exports = {
     runImportCSV: runImportCSV,
     createImportCSV: createImportCSV,
+    createImportMarc: createImportMarc,
     getImportFailed: getImportFailed,
     getImportCompleted: getImportCompleted,
     getImportProgress: getImportProgress,
@@ -29,27 +31,27 @@ module.exports = {
 };
 
 function runImportCSV(importId, services, track, callback) {
-    new UpdateImportStatusToProgress(importId, function(err) {
+    new UpdateImportStatusToProgress(importId, function (err) {
         if (!err) {
-            new GetImportById(importId, function(err, importTracker) {
+            new GetImportById(importId, function (err, importTracker) {
                 if (!err) {
                     logger.info('importTracker', importTracker);
                     services.fileServicePort.links.downloadFile.execute({
                         params: {
                             fileId: importTracker.fileId
                         }
-                    }, function(errFile, result) {
+                    }, function (errFile, result) {
                         if (!errFile) {
-                            new ParseRawCSV(result.response.rawEncoded, function(errParse, parsedCsv) {
+                            new ParseRawCSV(result.response.rawEncoded, function (errParse, parsedCsv) {
                                 if (!errParse) {
                                     var errorCount = 0;
-                                    new IterateCSVByBatch(parsedCsv, function(columns, item, itemCount, next) {
-                                        new CreateJsonFormatFromColumns(columns, item, function(errJsonFormat, jsonFormatObject) {
+                                    new IterateCSVByBatch(parsedCsv, function (columns, item, itemCount, next) {
+                                        new CreateJsonFormatFromColumns(columns, item, function (errJsonFormat, jsonFormatObject) {
                                             if (!errJsonFormat) {
                                                 if (importTracker.dataFor === 'student') {
                                                     services.studentServicePort.links.createStudent.execute({
                                                         data: jsonFormatObject
-                                                    }, function(errStudentSave) {
+                                                    }, function (errStudentSave) {
                                                         if (errStudentSave) {
                                                             //should log
                                                             logger.error('import', errStudentSave);
@@ -58,7 +60,7 @@ function runImportCSV(importId, services, track, callback) {
                                                             new UpdateErrorCountById(importId, errorCount);
                                                         } else {
                                                             new LogImportItemSuccess(importId, columns, item, itemCount);
-                                                            new UpdateTrackerCountById(importId, itemCount, function(errUpdateTracker) {
+                                                            new UpdateTrackerCountById(importId, itemCount, function (errUpdateTracker) {
                                                                 if (!errUpdateTracker) {
                                                                     track(jsonFormatObject, itemCount);
                                                                 }
@@ -69,7 +71,7 @@ function runImportCSV(importId, services, track, callback) {
                                                 } else if (importTracker.dataFor === 'faculty') {
                                                     services.facultyServicePort.links.createFaculty.execute({
                                                         data: jsonFormatObject
-                                                    }, function(errFacultySave) {
+                                                    }, function (errFacultySave) {
                                                         if (errFacultySave) {
                                                             //should log
                                                             errorCount++;
@@ -78,7 +80,7 @@ function runImportCSV(importId, services, track, callback) {
                                                             new UpdateErrorCountById(importId, errorCount);
                                                         } else {
                                                             new LogImportItemSuccess(importId, columns, item, itemCount);
-                                                            new UpdateTrackerCountById(importId, itemCount, function(errUpdateTracker) {
+                                                            new UpdateTrackerCountById(importId, itemCount, function (errUpdateTracker) {
                                                                 if (!errUpdateTracker) {
                                                                     track(jsonFormatObject, itemCount);
                                                                 }
@@ -91,8 +93,8 @@ function runImportCSV(importId, services, track, callback) {
                                                 callback(errJsonFormat);
                                             }
                                         });
-                                    }, function() {
-                                        new UpdateImportStatusToCompleted(importId, function() {
+                                    }, function () {
+                                        new UpdateImportStatusToCompleted(importId, function () {
                                             callback();
                                         });
                                     });
@@ -115,18 +117,18 @@ function runImportCSV(importId, services, track, callback) {
 }
 
 function createImportCSV(description, fileId, dataFor, rawEncoded, callback) {
-    new ParseRawCSV(rawEncoded, function(errParsing, data) {
+    new ParseRawCSV(rawEncoded, function (errParsing, data) {
         new CreateImportTracker({
             description: description,
             type: 'csv_importer',
             progressLimit: (data.length - 1),
             dataFor: dataFor,
             fileId: fileId
-        }, function(errCreateImport, resultCreateImport) {
+        }, function (errCreateImport, resultCreateImport) {
             if (errCreateImport) {
                 callback(errCreateImport);
             } else {
-                new CreateImportColumns(resultCreateImport._id, data[0], function(err) {
+                new CreateImportColumns(resultCreateImport._id, data[0], function (err) {
                     if (err) {
                         callback(err);
                     } else {
@@ -136,6 +138,26 @@ function createImportCSV(description, fileId, dataFor, rawEncoded, callback) {
                     }
                 });
 
+            }
+        });
+    });
+}
+
+function createImportMarc(description, fileId, dataFor, rawEncoded, callback) {
+    new ParseRawMarc(rawEncoded, function (errParsing, data) {
+        new CreateImportTracker({
+            description: description,
+            type: 'marc_importer',
+            progressLimit: (data.length - 1),
+            dataFor: dataFor,
+            fileId: fileId
+        }, function (errCreateImport, resultCreateImport) {
+            if (errCreateImport) {
+                callback(errCreateImport);
+            } else {
+                callback(undefined, {
+                    importId: resultCreateImport._id
+                });
             }
         });
     });

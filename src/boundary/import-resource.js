@@ -1,9 +1,10 @@
 'use strict';
+var GDSDomainDTO = require('gds-config').GDSDomainDTO;
 var API = process.env.API_NAME || '/api/import/';
 var Import = require('./import');
-module.exports = function(app, services, sockets) {
+module.exports = function (app, services, sockets) {
 
-    app.get('/', function(req, res) {
+    app.get('/', function (req, res) {
         res.status(200).send({
             domain: process.env.DOMAIN_NAME || 'Import',
             links: {
@@ -39,15 +40,15 @@ module.exports = function(app, services, sockets) {
         });
     });
 
-    app.put(API + 'run-import-csv', function(req, res) {
+    app.put(API + 'run-import-csv', function (req, res) {
         res.status(200).send({
             message: 'Import started for ' + req.body.importId
         });
-        Import.runImportCSV(req.body.importId, services, function(item, itemCount) {
-                console.log('tracker', item);
-                sockets.emit('import-tracker', { item: item, progress: itemCount });
-            },
-            function(err) {
+        Import.runImportCSV(req.body.importId, services, function (item, itemCount) {
+            console.log('tracker', item);
+            sockets.emit('import-tracker', { item: item, progress: itemCount });
+        },
+            function (err) {
                 if (err) {
                     console.error('import-resource', err);
                     sockets.emit('import-fail', err);
@@ -57,16 +58,16 @@ module.exports = function(app, services, sockets) {
 
             });
     });
-    app.post(API + 'create-import-csv', function(req, res) {
+    app.post(API + 'create-import-csv', function (req, res) {
         services.fileServicePort.links.downloadFile.execute({
             params: {
                 fileId: req.body.fileId //'57b3476991a9451b002cecef'
             }
-        }, function(err, result) {
+        }, function (err, result) {
             if (!err) {
                 Import.createImportCSV(req.body.description, req.body.fileId,
                     req.body.dataFor, result.response.rawEncoded,
-                    function(
+                    function (
                         err, result) {
                         if (err) {
                             res.status(500).send(err);
@@ -80,8 +81,29 @@ module.exports = function(app, services, sockets) {
             }
         });
     });
-    app.get(API + 'get-import-progress', function(req, res) {
-        Import.getImportProgress(function(err, result) {
+    app.post(API + 'create-import-marc', function (req, res) {
+        services.fileServicePort.links.downloadFile.execute({
+            params: {
+                fileId: req.body.fileId
+            }
+        }, function (err, result) {
+            if (!err) {
+                Import.createImportMarc(req.body.description, req.body.fileId,
+                    req.body.dataFor, result.response.rawEncoded,
+                    function (
+                        err, result) {
+                        if (err) {
+                            res.status(500).send(new GDSDomainDTO('ERROR_MESSAGE', err.message));
+                        } else {
+                            var domain = new GDSDomainDTO('CREATE-IMPORT-MARC', {importId: result.importId});
+                            res.status(200).send(domain);
+                        }
+                    });
+            }
+        });
+    });
+    app.get(API + 'get-import-progress', function (req, res) {
+        Import.getImportProgress(function (err, result) {
             if (err) {
                 res.status(200).send([]);
             } else {
@@ -89,8 +111,8 @@ module.exports = function(app, services, sockets) {
             }
         });
     });
-    app.get(API + 'get-import-completed', function(req, res) {
-        Import.getImportCompleted(function(err, result) {
+    app.get(API + 'get-import-completed', function (req, res) {
+        Import.getImportCompleted(function (err, result) {
             if (err) {
                 res.status(200).send([]);
             } else {
@@ -98,8 +120,8 @@ module.exports = function(app, services, sockets) {
             }
         });
     });
-    app.get(API + 'get-import-failed', function(req, res) {
-        Import.getImportFailed(function(err, result) {
+    app.get(API + 'get-import-failed', function (req, res) {
+        Import.getImportFailed(function (err, result) {
             if (err) {
                 res.status(200).send([]);
             } else {
@@ -107,8 +129,8 @@ module.exports = function(app, services, sockets) {
             }
         });
     });
-    app.get(API + 'get-import-logs/:importId', function(req, res) {
-        Import.getImportLogs(req.params.importId, function(err, result) {
+    app.get(API + 'get-import-logs/:importId', function (req, res) {
+        Import.getImportLogs(req.params.importId, function (err, result) {
             if (err) {
                 res.status(200).send([]);
             } else {
@@ -116,8 +138,8 @@ module.exports = function(app, services, sockets) {
             }
         });
     });
-    app.delete(API + 'remove-import-tracker/:importId', function(req, res) {
-        Import.removeImportTracker(req.params.importId, function(err) {
+    app.delete(API + 'remove-import-tracker/:importId', function (req, res) {
+        Import.removeImportTracker(req.params.importId, function (err) {
             if (err) {
                 res.status(500).send(err);
             } else {
