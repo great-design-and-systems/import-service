@@ -16,6 +16,14 @@ module.exports = function (app, services, sockets) {
                     method: 'PUT',
                     url: 'http://' + req.headers.host + API + 'run-import-csv'
                 },
+                createImportMarc: {
+                    method : 'POST',
+                    url: 'http://' + req.headers.host + API + 'create-import-marc'
+                },
+                runImportMarc: {
+                    method: 'PUT',
+                    url: 'http://' + req.headers.host + API + 'run-import-marc'
+                },
                 getImportCompleted: {
                     method: 'GET',
                     url: 'http://' + req.headers.host + API + 'get-import-completed'
@@ -96,6 +104,7 @@ module.exports = function (app, services, sockets) {
                             res.status(500).send(new GDSDomainDTO('ERROR_MESSAGE', err.message));
                         } else {
                             var domain = new GDSDomainDTO('CREATE-IMPORT-MARC', {importId: result.importId});
+                            domain.addPut('runImportMarc', 'http://' + req.headers.host + API + 'run-import-marc/' + result.importId);
                             res.status(200).send(domain);
                         }
                     });
