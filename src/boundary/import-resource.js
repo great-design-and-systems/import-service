@@ -17,7 +17,7 @@ module.exports = function (app, services, sockets) {
                     url: 'http://' + req.headers.host + API + 'run-import-csv'
                 },
                 createImportMarc: {
-                    method : 'POST',
+                    method: 'POST',
                     url: 'http://' + req.headers.host + API + 'create-import-marc'
                 },
                 runImportMarc: {
@@ -103,11 +103,27 @@ module.exports = function (app, services, sockets) {
                         if (err) {
                             res.status(500).send(new GDSDomainDTO('ERROR_MESSAGE', err.message));
                         } else {
-                            var domain = new GDSDomainDTO('CREATE-IMPORT-MARC', {importId: result.importId});
+                            var domain = new GDSDomainDTO('CREATE-IMPORT-MARC', { importId: result.importId });
                             domain.addPut('runImportMarc', 'http://' + req.headers.host + API + 'run-import-marc/' + result.importId);
                             res.status(200).send(domain);
                         }
                     });
+            }
+        });
+    });
+    app.put(API + 'run-import-marc/:importId', function (req, res) {
+        res.status(200).send({
+            message: 'Import started for ' + req.param.importId
+        });
+        Import.runImportMarc(req.param.importId, services, function (item, itemCount) {
+            console.log('tracker', item);
+            sockets.emit('import-tracker', { item: item, progress: itemCount });
+        }, function (err) {
+            if (err) {
+                console.error('import-resource', err);
+                sockets.emit('import-fail', err);
+            } else {
+                sockets.emit('import-complete');
             }
         });
     });
