@@ -1,3 +1,4 @@
+'use strict';
 var marc4js = require('marc4js');
 var fs = require('fs');
 
