@@ -5,7 +5,9 @@ var ParseRawCSV = require('../control/parse-raw-csv');
 var ParseRawMarc = require('../control/parse-raw-marc');
 var GetImportById = require('../control/get-import-by-id');
 var IterateCSVByBatch = require('../control/iterate-csv-by-batch');
+var IterateMarcByBatch = require('../control/iterate-marc-by-batch');
 var CreateJsonFormatFromColumns = require('../control/create-json-format-from-columns');
+var CreateJsonFromMarcRecord = require('../control/create-json-from-marc-record');
 var UpdateTrackerCountById = require('../control/update-tracker-count-by-id');
 var UpdateImportStatusToProgress = require('../control/update-import-status-to-inprogress');
 var UpdateImportStatusToCompleted = require('../control/update-import-status-to-completed');
@@ -18,9 +20,11 @@ var GetImportLogs = require('../control/get-import-logs');
 var RemoveImportTracker = require('../control/remove-import-tracker');
 var UpdateErrorCountById = require('../control/update-error-count-by-id');
 var logger = require('../control/get-logger');
+var GDSEventJobs = require('gds-config').GDSEventJobs;
 
 module.exports = {
     runImportCSV: runImportCSV,
+    runImportMarc: runImportMarc,
     createImportCSV: createImportCSV,
     createImportMarc: createImportMarc,
     getImportFailed: getImportFailed,
@@ -112,6 +116,54 @@ function runImportCSV(importId, services, track, callback) {
             });
         } else {
             callback(err);
+        }
+    });
+}
+
+function runImportMarc(importId, services, track, callback) {
+    new UpdateImportStatusToProgress(importId, function (err) {
+        if (err) {
+            callback(err);
+        } else {
+            new GetImportById(importId, function (err, importTracker) {
+                if (err) {
+                    callback(err);
+                } else {
+                    logger.info('marc-importTracker', importTracker);
+                    services.fileServicePort.links.downloadFile.execute({
+                        params: {
+                            fileId: importTracker.fileId
+                        }
+                    }, function (err, result) {
+                        if (err) {
+                            callback(err);
+                        } else {
+                            new ParseRawMarc(result.response.rawEncoded, function (errParse, parsedMarc) {
+                                if (errParse) {
+                                    callback(errParse);
+                                } else {
+                                    new IterateMarcByBatch(parsedMarc, function (marcRecord, recordCount, next) {
+                                        new CreateJsonFromMarcRecord(marcRecord, function (errJsonFormat, jsonObject) {
+                                            if (errJsonFormat) {
+                                                callback(errJsonFormat);
+                                            } else {
+                                                new GDSEventJobs().createProcedureJob();
+                                                console.log('recordCount', recordCount);
+                                                console.log(jsonObject);
+                                            }
+                                            next();
+                                        });
+                                    }, function () {
+                                        new UpdateImportStatusToCompleted(importId, function () {
+                                            callback();
+                                        });
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         }
     });
 }

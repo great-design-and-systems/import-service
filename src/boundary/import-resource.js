@@ -113,9 +113,9 @@ module.exports = function (app, services, sockets) {
     });
     app.put(API + 'run-import-marc/:importId', function (req, res) {
         res.status(200).send({
-            message: 'Import started for ' + req.param.importId
+            message: 'Import started for ' + req.params.importId
         });
-        Import.runImportMarc(req.param.importId, services, function (item, itemCount) {
+        Import.runImportMarc(req.params.importId, services, function (item, itemCount) {
             console.log('tracker', item);
             sockets.emit('import-tracker', { item: item, progress: itemCount });
         }, function (err) {
