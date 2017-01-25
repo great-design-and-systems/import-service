@@ -142,14 +142,55 @@ function runImportMarc(importId, services, track, callback) {
                                 if (errParse) {
                                     callback(errParse);
                                 } else {
+                                    var errorCount = 0;
                                     new IterateMarcByBatch(parsedMarc, function (marcRecord, recordCount, next) {
-                                        new CreateJsonFromMarcRecord(marcRecord, function (errJsonFormat, jsonObject) {
+                                        new CreateJsonFromMarcRecord(marcRecord, function (errJsonFormat, marcJson) {
                                             if (errJsonFormat) {
                                                 callback(errJsonFormat);
                                             } else {
-                                                new GDSEventJobs().createProcedureJob();
+                                                // Item.createItem
+                                                // item.name = title
+                                                // item.category = importTracker.dataFor
+                                                // Category.createItemCategory
+                                                // {
+                                                //     "category": importTracker.dataFor,
+                                                //     "content": {
+                                                //         "itemId": result._id of item- service,
+                                                //         "author": marc 100 or 245 subfield c,
+                                                //         "edition": 250,
+                                                //         "imprint": {
+                                                //             [{"publicationPlace": 260 a, "publisher": 260 b},{"publicationPlace": 260 a, "publisher": 260 b}],
+                                                //             "publicationDate": 260 c
+                                                //         },
+                                                //         "marc" : marcRecord text format
+                                                //     }
+                                                // }
+                                                // }
+                                                marcJson.itemId = '$data.itemId;';
+                                                new GDSEventJobs().createProcedureJob('SAVE_MARC_DETAILS', 'SYSTEM')
+                                                    .setNextEvent('CREATE_ITEM_RECORD','Items.createItem')
+                                                    .addBody('name', marcJson.title)
+                                                    .addBody('category', importTracker.dataFor)
+                                                    .setNextEvent('CREATE_CATEGORY_ITEM', 'Category.createItemCategory')
+                                                    .addBody('category', importTracker.dataFor)
+                                                    .addBody('content', JSON.stringify(marcJson))
+                                                    .execute(function (err) {
+                                                        if (err) {
+                                                            console.err(err);
+                                                            logger.error('run-import-marc', err);
+                                                            new LogImportItemFailed(importId, '', marcJson, recordCount);
+                                                            new UpdateErrorCountById(importId, ++errorCount);
+                                                        } else {
+                                                            new LogImportItemSuccess(importId, '', marcJson, recordCount);
+                                                            new UpdateTrackerCountById(importId, recordCount, function (errUpdateTracker) {
+                                                                if (!errUpdateTracker) {
+                                                                    track(marcJson, recordCount);
+                                                                }
+                                                            });
+                                                        }
+                                                    });
                                                 console.log('recordCount', recordCount);
-                                                console.log(jsonObject);
+                                                console.log(marcJson);
                                             }
                                             next();
                                         });
