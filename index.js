@@ -18,10 +18,8 @@ var Socket = require('./src/config/socket');
             new Database();
             new Server(app);
             new LoggerServer(app);
-            new GDSUtil().initEvents(function () {
-                new Socket(app, io, http, function (err, sockets) {
-                    new ImportResource(app, services, sockets);
-                });
+            new Socket(app, io, http, function (err, sockets) {
+                new ImportResource(app, services, sockets);
             });
         }
     });
